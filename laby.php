@@ -68,41 +68,62 @@ function handleWin()
     session_destroy();
 }
 
-function displayGrid($aGrid, $player)
+function displayBrume($aGrid, $player)
 {
     $visibleArea = [
         $player[0] - 1,
         $player[0] + 1,
         $player[1] - 1,
-        $player[1] + 1
+        $player[1] + 1,
+
+        $player[0] - 2,
+        $player[0] + 2,
+        $player[1] - 2,
+        $player[1] + 2,
+
     ];
+
     foreach ($aGrid as $y => $mescouilles) {
         foreach ($aGrid[$y] as $x => $value) {
-            $visible = true;
+            $visible = false;
+            if ($x == $player[1] && $y == $player[0]) $visible = true;
             if ($x == $player[1] && ($y == $visibleArea[0] || $y == $visibleArea[1])) $visible = true;
             if ($y == $player[0] && ($x == $visibleArea[2] || $x == $visibleArea[3])) $visible = true;
 
+            if ($x == $player[1] + 1 && ($y == $visibleArea[0] || $y == $visibleArea[1])) $visible = true;
+            if ($x == $player[1] - 1 && ($y == $visibleArea[0] || $y == $visibleArea[1])) $visible = true;
+
+            if ($x == $player[1] && ($y == $visibleArea[4] || $y == $visibleArea[5])) $visible = true;
+            if ($y == $player[0] && ($x == $visibleArea[6] || $x == $visibleArea[7])) $visible = true;
+
+            if ($visible) {
+                echo '<div></div>';
+            } else {
+                echo '<div class="hide"></div>';
+            }
+        }
+    }
+}
+function displayGrid($aGrid, $player)
+{
+    foreach ($aGrid as $y => $mescouilles) {
+        foreach ($aGrid[$y] as $x => $value) {
             if ($y == $player[0] && $x == $player[1]) {
                 echo '<div class="pos player"></div>';
             } else {
-
-                if ($visible) {
-                    switch ($value) {
-                        case 0: {
-                                echo '<div class="pos open"></div>';
-                                break;
-                            }
-                        case 1: {
-                                echo '<div class="pos close"></div>';
-                                break;
-                            }
-                        case 2: {
-                                echo '<div class="pos mouse"></div>';
-                                break;
-                            }
-                    }
-                } else {
-                    echo '<div class="pos hidden"></div>';
+                switch ($value) {
+                    case 0: {
+                            echo '<div class="pos open"></div>';
+                            break;
+                        }
+                    case 1: {
+                            echo '<div class="pos close"></div>';
+                            break;
+                        }
+                    case 2: {
+                            echo '<div class="pos mouse"></div>';
+                            break;
+                        }
                 }
             }
         }
@@ -221,17 +242,31 @@ function generateMazeWithBorders($width, $height)
         }
 
         .game {
+            position: relative;
+            margin: auto;
+        }
+
+        .maze {
             display: grid;
             grid-template-columns: repeat(15, 40px);
             grid-template-rows: repeat(11, 40px);
-            margin: auto;
             padding: 2em;
         }
 
-        .pos.hidden {
+        .brume {
+            position: absolute;
+            z-index: 2;
+            top: 0;
+            display: grid;
+            grid-template-columns: repeat(15, 40px);
+            grid-template-rows: repeat(11, 40px);
+            padding: 2em;
+        }
+
+        .brume div.hide {
             background-color: green;
-            scale: 1.5;
-            filter: blur(25px);
+            scale: 1.7;
+            filter: blur(10px);
         }
 
         .pos.player {
@@ -267,17 +302,21 @@ function generateMazeWithBorders($width, $height)
 <body>
     <div id="app">
         <div class="game">
-            <?php
-            global $defaultGrid;
-            global $playerPos;
-            global $ended;
-            if (!$ended) {
+            <div class="maze">
+                <?php
+                global $defaultGrid;
+                global $playerPos;
                 displayGrid($defaultGrid, $playerPos);
-            } else {
-                echo '<div class="end">gg</div>';
-            }
+                ?>
+            </div>
+            <div class="brume">
+                <?php
+                global $defaultGrid;
+                global $playerPos;
+                displayBrume($defaultGrid, $playerPos);
+                ?>
+            </div>
 
-            ?>
         </div>
         <form class="text" method="post">
             <button class="reset" name="reset">Recommencer</button>
